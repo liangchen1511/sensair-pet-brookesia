@@ -1,0 +1,170 @@
+[
+  {
+    "name": "disdain_st3",
+    "file": "disdain_st3.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 5
+  },
+  {
+    "name": "disdain_st1",
+    "file": "disdain_st1.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 8
+  },
+  {
+    "name": "disdain_st2",
+    "file": "disdain_st2.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 13
+  },
+  {
+    "name": "anger_step1",
+    "file": "anger_step1.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 8
+  },
+  {
+    "name": "anger_step2",
+    "file": "anger_step2.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 13
+  },
+  {
+    "name": "anger-step3",
+    "file": "anger-step3.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 5
+  },
+  {
+    "name": "fear_step2",
+    "file": "fear_step2.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 13
+  },
+  {
+    "name": "fear_step3",
+    "file": "fear_step3.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 5
+  },
+  {
+    "name": "fear_step1",
+    "file": "fear_step1.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 8
+  },
+  {
+    "name": "right_step2",
+    "file": "right_step2.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 6
+  },
+  {
+    "name": "right_step3",
+    "file": "right_step3.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 3
+  },
+  {
+    "name": "right_step1",
+    "file": "right_step1.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 3
+  },
+  {
+    "name": "left_step2",
+    "file": "left_step2.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 6
+  },
+  {
+    "name": "left_step3",
+    "file": "left_step3.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 3
+  },
+  {
+    "name": "left_step1",
+    "file": "left_step1.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 3
+  },
+  {
+    "name": "sad_step1",
+    "file": "sad_step1.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 8
+  },
+  {
+    "name": "sad_step2",
+    "file": "sad_step2.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 13
+  },
+  {
+    "name": "sad_step",
+    "file": "sad_step.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 5
+  },
+  {
+    "name": "excited_st1",
+    "file": "excited_st1.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 8
+  },
+  {
+    "name": "excited_st2",
+    "file": "excited_st2.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 13
+  },
+  {
+    "name": "excited_st3",
+    "file": "excited_st3.eaf",
+    "x": 0,
+    "y": 0,
+    "loop": [],
+    "fps": 5
+  }
+]

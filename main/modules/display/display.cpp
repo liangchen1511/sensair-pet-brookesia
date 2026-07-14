@@ -134,7 +134,13 @@ bool Display::start_lvgl(int core_id)
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
     esp_lv_adapter_config_t adapter_config = ESP_LV_ADAPTER_DEFAULT_CONFIG();
 #pragma GCC diagnostic pop
+#if CONFIG_SENSAIR_PET_AUDIO_FIRST_RENDERING
+    // XiaoZhi audio runs at priority 5 and the audio mixer at priority 20.
+    // Keep LVGL below both so settings/display work can never starve audio.
+    adapter_config.task_priority = 4;
+#else
     adapter_config.task_priority = 6;
+#endif
     adapter_config.task_core_id = core_id;
     adapter_config.tick_period_ms = 5;
     adapter_config.task_min_delay_ms = 10;
@@ -273,11 +279,17 @@ bool Display::start_expression_emote(int core_id)
         .v_res = display_info.v_res,
         .buf_pixels = static_cast<size_t>(display_info.h_res * 16),
 #if CONFIG_IDF_TARGET_ESP32C5
-        .fps = 15,
+        // The Sensair black/white EAF clips are authored at 12 FPS. A higher render
+        // clock only wakes the single C5 core without producing additional frames.
+        .fps = 12,
 #else
         .fps = 30,
 #endif
+#if CONFIG_SENSAIR_PET_AUDIO_FIRST_RENDERING
+        .task_priority = 3,
+#else
         .task_priority = 5,
+#endif
         .task_stack = 5 * 1024,
         .task_affinity = core_id,
         .flag_swap_color_bytes = (panel_driver_specific.bus_type == hal::DisplayPanelIface::BusType::Generic),
@@ -288,6 +300,10 @@ bool Display::start_expression_emote(int core_id)
                       EmoteHelper::FunctionId::SetConfig, BROOKESIA_DESCRIBE_TO_JSON(config).as_object()
                   );
     BROOKESIA_CHECK_FALSE_RETURN(result.has_value(), false, "Failed to set emote config: %1%", result.error());
+
+#if CONFIG_SENSAIR_PET_AUDIO_FIRST_RENDERING
+    BROOKESIA_LOGI("Audio-first display enabled: emote priority=3, C5 render cap=12 FPS, overdue EAF frames are skipped");
+#endif
 
     // Subscribe to flush ready event
     auto flush_ready_event_slot = [&](const std::string & event_name, const boost::json::object & param_json) {

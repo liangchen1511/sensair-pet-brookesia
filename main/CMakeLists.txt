@@ -19,8 +19,9 @@ littlefs_create_partition_image(littlefs_data ../littlefs FLASH_IN_PROJECT)
 
 set(ASSETS_PARTITION_NAME "anim_icon")
 set(ASSETS_BIN_NAME ${ASSETS_PARTITION_NAME})
-set(SUPPORTED_RESOLUTIONS "320_240" "360_360" "1024_600")
+set(SUPPORTED_RESOLUTIONS "240_284" "320_240" "360_360" "1024_600")
 set(DEFAULT_RESOLUTION "320_240")
+set(SENSAIR_ASSETS_EXTERNAL_PATH "${CMAKE_SOURCE_DIR}/assets/sensair_bw")
 set(RESOLUTION "${CONFIG_BROOKESIA_HAL_ADAPTOR_DISPLAY_LCD_PANEL_H_RES}_${CONFIG_BROOKESIA_HAL_ADAPTOR_DISPLAY_LCD_PANEL_V_RES}")
 # Use an exact asset resolution when available. Otherwise, choose the largest supported
 # resolution that does not exceed the configured panel size, then fall back to the default.
@@ -72,7 +73,15 @@ if (NOT RESOLUTION IN_LIST SUPPORTED_RESOLUTIONS)
 endif()
 message(STATUS "Asset Resolution: ${RESOLUTION}")
 set(ASSETS_FILE "${CMAKE_BINARY_DIR}/${ASSETS_BIN_NAME}.bin")
-build_speaker_assets_bin(${ASSETS_BIN_NAME} ${RESOLUTION} ${ASSETS_FILE} ${CONFIG_MMAP_FILE_NAME_LENGTH})
+build_speaker_assets_bin(
+    ${ASSETS_BIN_NAME}
+    ${RESOLUTION}
+    ${ASSETS_FILE}
+    ${CONFIG_MMAP_FILE_NAME_LENGTH}
+    ${SENSAIR_ASSETS_EXTERNAL_PATH}
+)
+file(GLOB_RECURSE SENSAIR_ASSET_INPUTS CONFIGURE_DEPENDS "${SENSAIR_ASSETS_EXTERNAL_PATH}/*")
+add_custom_command(OUTPUT ${ASSETS_FILE} APPEND DEPENDS ${SENSAIR_ASSET_INPUTS})
 message(STATUS "Generated emote assets: ${ASSETS_FILE} -> ${ASSETS_PARTITION_NAME} partition")
 esptool_py_flash_to_partition(flash ${ASSETS_PARTITION_NAME} "${ASSETS_FILE}")
 

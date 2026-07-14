@@ -1,0 +1,260 @@
+[
+  {
+    "name": "index.json",
+    "size": 2501,
+    "table_width": 0,
+    "table_height": 0
+  },
+  {
+    "name": "disdain_st3.eaf",
+    "size": 20518,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 5,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "disdain_st1.eaf",
+    "size": 30374,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 8,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "disdain_st2.eaf",
+    "size": 46001,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 13,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "anger_step1.eaf",
+    "size": 26434,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 8,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "anger_step2.eaf",
+    "size": 53649,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 13,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "anger-step3.eaf",
+    "size": 16249,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 5,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "fear_step2.eaf",
+    "size": 61144,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 13,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "fear_step3.eaf",
+    "size": 18233,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 5,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "fear_step1.eaf",
+    "size": 36076,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 8,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "right_step2.eaf",
+    "size": 8466,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 6,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "right_step3.eaf",
+    "size": 12577,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 3,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "right_step1.eaf",
+    "size": 10094,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 3,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "left_step2.eaf",
+    "size": 8510,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 6,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "left_step3.eaf",
+    "size": 12557,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 3,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "left_step1.eaf",
+    "size": 9849,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 3,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "sad_step1.eaf",
+    "size": 26174,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 8,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "sad_step2.eaf",
+    "size": 43237,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 13,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "sad_step.eaf",
+    "size": 17323,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 5,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "excited_st1.eaf",
+    "size": 30636,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 8,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "excited_st2.eaf",
+    "size": 48956,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 13,
+      "width": 240,
+      "height": 240
+    }
+  },
+  {
+    "name": "excited_st3.eaf",
+    "size": 19371,
+    "table_width": 0,
+    "table_height": 0,
+    "eaf": {
+      "format": "EAF",
+      "frames": 5,
+      "width": 240,
+      "height": 240
+    }
+  }
+]

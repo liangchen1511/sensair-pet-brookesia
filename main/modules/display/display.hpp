@@ -89,7 +89,7 @@ public:
         esp_brookesia::lib_utils::ThreadConfig gesture_thread_config{
             .name = "DisplayGesture",
             .core_id = -1,
-            .priority = 5,
+            .priority = 3,
             .stack_size = 10 * 1024,
         };
         GestureData gesture_data{};

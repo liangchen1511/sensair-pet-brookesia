@@ -1,0 +1,48 @@
+[
+  {
+    "type": "anim",
+    "name": "eye_anim",
+    "align": "GFX_ALIGN_CENTER",
+    "x": 0,
+    "y": 0,
+    "anim": {"mirror": "false"}
+  },
+  {
+    "type": "anim",
+    "name": "emerg_dlg",
+    "align": "GFX_ALIGN_CENTER",
+    "x": 0,
+    "y": 0,
+    "anim": {"mirror": "false"}
+  },
+  {
+    "type": "image",
+    "name": "status_icon",
+    "align": "GFX_ALIGN_TOP_MID",
+    "x": -92,
+    "y": 10
+  },
+  {
+    "type": "image",
+    "name": "charge_icon",
+    "align": "GFX_ALIGN_TOP_MID",
+    "x": -70,
+    "y": 20
+  },
+  {
+    "type": "anim",
+    "name": "listen_anim",
+    "align": "GFX_ALIGN_CENTER",
+    "x": 0,
+    "y": 0,
+    "anim": {"mirror": "false"}
+  },
+  {
+    "type": "qrcode",
+    "name": "qrcode",
+    "align": "GFX_ALIGN_CENTER",
+    "x": 0,
+    "y": 0,
+    "qrcode": {"size": 190}
+  }
+]

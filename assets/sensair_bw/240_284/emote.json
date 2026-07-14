@@ -1,0 +1,22 @@
+[
+  {"emote": "happy",       "src": "excited_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "laughing",    "src": "excited_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "funny",       "src": "excited_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "loving",      "src": "excited_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "embarrassed", "src": "excited_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "confident",   "src": "excited_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "delicious",   "src": "excited_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "sad",         "src": "sad_step2.eaf",   "loop": true,  "fps": 12},
+  {"emote": "crying",      "src": "sad_step2.eaf",   "loop": true,  "fps": 12},
+  {"emote": "sleepy",      "src": "disdain_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "silly",       "src": "excited_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "angry",       "src": "anger_step2.eaf", "loop": true,  "fps": 12},
+  {"emote": "surprised",   "src": "fear_step2.eaf",  "loop": true,  "fps": 12},
+  {"emote": "shocked",     "src": "fear_step2.eaf",  "loop": true,  "fps": 12},
+  {"emote": "thinking",    "src": "left_step2.eaf",  "loop": true,  "fps": 12},
+  {"emote": "winking",     "src": "right_step1.eaf", "loop": false, "fps": 12},
+  {"emote": "relaxed",     "src": "excited_st2.eaf", "loop": true,  "fps": 12},
+  {"emote": "confused",    "src": "left_step2.eaf",  "loop": true,  "fps": 12},
+  {"emote": "neutral",     "src": "right_step2.eaf", "loop": true,  "fps": 12},
+  {"emote": "idle",        "src": "right_step2.eaf", "loop": true,  "fps": 12}
+]

@@ -22,6 +22,7 @@ Thumbs.db
 desktop.ini
 
 # 本地/临时
+MIGRATION_NOTES.md
 *.log
 *.tmp
 *.bak
