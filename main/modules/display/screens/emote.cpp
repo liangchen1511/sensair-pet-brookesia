@@ -15,6 +15,38 @@ using EmoteHelper = service::helper::ExpressionEmote;
 using AgentHelper = agent::helper::Manager;
 using WifiHelper = service::helper::Wifi;
 
+namespace {
+
+lv_obj_t *black_screen = nullptr;
+
+bool prepare_black_screen(lv_display_t *display)
+{
+    auto lock_ret = esp_lv_adapter_lock(-1);
+    BROOKESIA_CHECK_ESP_ERR_RETURN(lock_ret, false, "Failed to lock LVGL for black screen refresh");
+    lib_utils::FunctionGuard unlock_guard([]() {
+        esp_lv_adapter_unlock();
+    });
+
+    if (black_screen == nullptr) {
+        black_screen = lv_obj_create(nullptr);
+        BROOKESIA_CHECK_NULL_RETURN(black_screen, false, "Failed to create black transition screen");
+        lv_obj_remove_flag(black_screen, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_set_style_bg_color(black_screen, lv_color_black(), LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(black_screen, LV_OPA_COVER, LV_PART_MAIN);
+        lv_obj_set_style_border_width(black_screen, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(black_screen, 0, LV_PART_MAIN);
+    }
+
+    // EAF objects only redraw their own dirty regions. Clear the complete 240x284 GRAM first
+    // so the power-on/LVGL white background cannot survive around the 240x240 animation.
+    lv_screen_load(black_screen);
+    lv_obj_invalidate(black_screen);
+    lv_refr_now(display);
+    return true;
+}
+
+} // namespace
+
 ScreenEmote::ScreenEmote():
     StateBase(BROOKESIA_DESCRIBE_TO_STR(DisplayScreen::Emote))
 {
@@ -58,6 +90,8 @@ bool ScreenEmote::on_enter(const std::string &from_state, const std::string &act
 
     lv_display_t *lv_disp = lv_display_get_default();
     BROOKESIA_CHECK_NULL_RETURN(lv_disp, false, "Failed to get default display");
+
+    BROOKESIA_CHECK_FALSE_RETURN(prepare_black_screen(lv_disp), false, "Failed to prepare black emote background");
 
     auto ret = esp_lv_adapter_set_dummy_draw(lv_disp, true);
     BROOKESIA_CHECK_ESP_ERR_RETURN(ret, false, "Failed to set dummy draw");

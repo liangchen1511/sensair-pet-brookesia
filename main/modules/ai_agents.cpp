@@ -9,8 +9,10 @@
 #include "brookesia/agent_helper.hpp"
 #include "brookesia/mcp_utils/mcp_utils.hpp"
 #include "brookesia/hal_interface.hpp"
+#include "brookesia/service_custom/service_custom.hpp"
 #include "private/utils.hpp"
 #include "ai_agents.hpp"
+#include "sensor_context.hpp"
 
 using namespace esp_brookesia;
 
@@ -229,6 +231,17 @@ void AI_Agents::init_xiaozhi()
         add_device_service_tools_result.error()
     );
     BROOKESIA_LOGI("Added device service tools: %1%", add_device_service_tools_result.value());
+
+    auto add_environment_tools_result = XiaoZhiHelper::call_function_sync<boost::json::array>(
+            XiaoZhiHelper::FunctionId::AddMCP_ToolsWithServiceFunction,
+            std::string(service::CustomServiceName),
+            BROOKESIA_DESCRIBE_TO_JSON(SensorContext::get_mcp_function_names()).as_array()
+                                        );
+    BROOKESIA_CHECK_FALSE_EXIT(
+        add_environment_tools_result, "Failed to add environment service tools: %1%",
+        add_environment_tools_result.error()
+    );
+    BROOKESIA_LOGI("Added environment service tools: %1%", add_environment_tools_result.value());
 
     // Subscribe to activation code received event
     auto activation_code_received_slot = [this](const std::string & event_name, const std::string & code) {
@@ -576,6 +589,7 @@ void AI_Agents::process_emote_when_speaking_status_changed()
             return;
         }
 
+#if !CONFIG_SENSAIR_PET_TEXTLESS_EMOTE
         if (is_speaking) {
             EmoteHelper::call_function_async(
                 EmoteHelper::FunctionId::SetEventMessage,
@@ -585,6 +599,7 @@ void AI_Agents::process_emote_when_speaking_status_changed()
             // Only hide event message when the agent is not listening
             EmoteHelper::call_function_async(EmoteHelper::FunctionId::HideEventMessage);
         }
+#endif
         is_speaking_ = is_speaking;
     };
     auto connection = AgentHelper::subscribe_event(AgentHelper::EventId::SpeakingStatusChanged, slot);
@@ -633,6 +648,9 @@ void AI_Agents::process_emote_when_listening_status_changed()
 
 void AI_Agents::process_emote_when_agent_speaking_text_got()
 {
+#if CONFIG_SENSAIR_PET_TEXTLESS_EMOTE
+    return; // no subtitle / Speak overlay on textless UI
+#else
     auto slot = [this](const std::string & event_name, const std::string & text) {
         BROOKESIA_LOG_TRACE_GUARD();
 
@@ -656,10 +674,14 @@ void AI_Agents::process_emote_when_agent_speaking_text_got()
     } else {
         BROOKESIA_LOGE("Failed to subscribe to Agent agent speaking text got event");
     }
+#endif
 }
 
 void AI_Agents::process_emote_when_user_speaking_text_got()
 {
+#if CONFIG_SENSAIR_PET_TEXTLESS_EMOTE
+    return; // no user subtitle on textless UI
+#else
     auto slot = [this](const std::string & event_name, const std::string & text) {
         BROOKESIA_LOG_TRACE_GUARD();
 
@@ -683,6 +705,7 @@ void AI_Agents::process_emote_when_user_speaking_text_got()
     } else {
         BROOKESIA_LOGE("Failed to subscribe to Agent user speaking text got event");
     }
+#endif
 }
 
 void AI_Agents::process_emote_when_coze_event_happened()

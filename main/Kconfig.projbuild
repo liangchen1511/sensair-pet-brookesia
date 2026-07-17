@@ -3,8 +3,9 @@ menu "Example Configuration"
         bool "Use a textless main emote screen"
         default y
         help
-            Remove main-screen text labels and bundled emote fonts. Provisioning QR,
-            status icons, activation audio, and the LVGL settings screen remain available.
+            Remove main-screen text labels, speak-status speaker overlay, and bundled
+            emote fonts. Provisioning QR, Wi-Fi/battery/listen icons, activation audio,
+            and the LVGL settings screen remain available.
 
     config SENSAIR_PET_AUDIO_FIRST_RENDERING
         bool "Prioritize audio and skip overdue emote frames"

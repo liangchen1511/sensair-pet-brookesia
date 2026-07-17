@@ -12,6 +12,7 @@
 #include "modules/wifi_provisioning.hpp"
 #include "modules/ai_agents.hpp"
 #include "modules/general_services.hpp"
+#include "modules/sensor_context.hpp"
 #include "modules/profiler.hpp"
 #include "modules/display/display.hpp"
 
@@ -91,6 +92,9 @@ extern "C" void app_main(void)
         GeneralServices::get_instance().start_sntp();
         GeneralServices::get_instance().start_device();
         GeneralServices::get_instance().init_audio();
+
+        /* Start local sensor context before XiaoZhi MCP tools are registered */
+        SensorContext::get_instance().start(backend_scheduler);
 
         /* Initialize AI agents */
         AI_Agents::get_instance().init({

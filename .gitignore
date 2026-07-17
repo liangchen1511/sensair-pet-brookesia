@@ -23,6 +23,7 @@ desktop.ini
 
 # 本地/临时
 MIGRATION_NOTES.md
+SERIAL_LOG.md
 *.log
 *.tmp
 *.bak

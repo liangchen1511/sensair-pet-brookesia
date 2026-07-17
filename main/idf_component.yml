@@ -21,6 +21,9 @@ dependencies:
   espressif/brookesia_service_wifi:
     version: "*"
     override_path: "../../esp-brookesia-master/service/brookesia_service_wifi"
+  espressif/brookesia_service_custom:
+    version: "*"
+    override_path: "../../esp-brookesia-master/service/brookesia_service_custom"
 
   # Agents
   espressif/brookesia_agent_coze:

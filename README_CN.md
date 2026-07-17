@@ -2,7 +2,7 @@
 
 [English Version](./README.md)
 
-本示例演示了如何基于 ESP-Brookesia 框架构建一个完整的 AI 语音聊天机器人，支持唤醒词检测、多 AI Agent 接入与运行时切换、表情动画显示、手势导航以及通过 MCP 工具让 AI 直接控制设备硬件。
+本工程基于 ESP-Brookesia 官方聊天机器人示例，面向 ESP-SensairShuttle 改造成 Sensair Pet 桌面宠物。产品范围、体验优先级与验收指标见 [Sensair Pet 产品需求设计](./PRODUCT_REQUIREMENTS_CN.md)。
 
 ## 📑 目录
 
@@ -90,9 +90,11 @@
 
 ### 语音交互
 
-AI Agent 启动后即可开始对话，默认配置为半双工模式，即 Agent 说话时不会聆听人声，但是可以通过唤醒词（默认为 "Hi,ESP"）打断 Agent 说话并开始聆听人声。
+AI Agent 启动后即可开始对话，默认唤醒词为“你好小智”。
 
 Agent 应答时屏幕会同步显示对应表情动画，对话结束后自动回到待机状态。
+
+ESP32-C5 版本启用了音频优先半双工模式：Agent 播报时会停止麦克风编码器和 AFE，把单核 CPU 让给网络收包、语音解码和播放。因此播报期间不能使用唤醒词打断，请点击屏幕中断；播报结束后会自动恢复本地唤醒。
 
 XiaoZhi Agent 在对话中可主动调用 MCP 工具执行设备操作，例如：
 

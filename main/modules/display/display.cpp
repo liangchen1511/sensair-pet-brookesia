@@ -5,12 +5,15 @@
  */
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include "esp_heap_caps.h"
 #include "esp_lcd_touch.h"
 #include "esp_lv_adapter.h"
+#include "esp_timer.h"
 #include "private/utils.hpp"
 #include "brookesia/lib_utils.hpp"
 #include "brookesia/service_helper.hpp"
@@ -28,8 +31,92 @@ namespace {
 
 constexpr uint32_t BACKLIGHT_ON_DELAY_MS = 1000;
 constexpr uint32_t LOAD_ASSETS_TIMEOUT_MS = 10000;
+constexpr uint32_t EMOTE_PERF_REPORT_INTERVAL_US = 5 * 1000 * 1000;
+constexpr size_t EMOTE_DMA_TIMESTAMP_QUEUE_SIZE = 4;
 constexpr float PI = 3.14159265358979323846F;
 constexpr size_t TOUCH_READ_MAX_POINTS = 1;
+
+struct EmoteFlushStats {
+    std::atomic<uint32_t> submitted{0};
+    std::atomic<uint32_t> completed{0};
+    std::atomic<uint32_t> errors{0};
+    std::array<std::atomic<uint32_t>, EMOTE_DMA_TIMESTAMP_QUEUE_SIZE> submit_times_us{};
+    std::atomic<uint32_t> submit_sequence{0};
+    std::atomic<uint32_t> complete_sequence{0};
+    std::atomic<uint32_t> total_dma_us{0};
+    std::atomic<uint32_t> max_dma_us{0};
+    std::atomic<uint32_t> last_submit_us{0};
+    std::atomic<uint32_t> max_submit_gap_us{0};
+    uint32_t report_started_us = 0;
+};
+
+EmoteFlushStats emote_flush_stats;
+
+void update_atomic_max(std::atomic<uint32_t> &target, uint32_t value)
+{
+    uint32_t current = target.load(std::memory_order_relaxed);
+    while ((value > current) &&
+            !target.compare_exchange_weak(current, value, std::memory_order_relaxed, std::memory_order_relaxed)) {
+    }
+}
+
+void notify_emote_flush_finished()
+{
+    expression::Emote::get_instance().native_notify_flush_finished();
+}
+
+void on_emote_color_transfer_done(lv_display_t *display, bool in_isr, void *user_ctx)
+{
+    (void)display;
+    (void)in_isr;
+    (void)user_ctx;
+
+    const uint32_t complete_sequence = emote_flush_stats.complete_sequence.load(std::memory_order_relaxed);
+    const uint32_t submit_sequence = emote_flush_stats.submit_sequence.load(std::memory_order_acquire);
+    if (complete_sequence == submit_sequence) {
+        // A non-Emote dummy draw (for example a one-time background clear) completed.
+        return;
+    }
+
+    const uint32_t now_us = static_cast<uint32_t>(esp_timer_get_time());
+    const uint32_t started_us = emote_flush_stats
+                                .submit_times_us[complete_sequence % EMOTE_DMA_TIMESTAMP_QUEUE_SIZE]
+                                .load(std::memory_order_relaxed);
+    emote_flush_stats.complete_sequence.store(complete_sequence + 1, std::memory_order_release);
+    const uint32_t dma_us = now_us - started_us;
+    emote_flush_stats.total_dma_us.fetch_add(dma_us, std::memory_order_relaxed);
+    update_atomic_max(emote_flush_stats.max_dma_us, dma_us);
+    emote_flush_stats.completed.fetch_add(1, std::memory_order_relaxed);
+    notify_emote_flush_finished();
+}
+
+void report_emote_flush_stats_if_due(uint32_t now_us)
+{
+    if (emote_flush_stats.report_started_us == 0) {
+        emote_flush_stats.report_started_us = now_us;
+        return;
+    }
+    if ((now_us - emote_flush_stats.report_started_us) < EMOTE_PERF_REPORT_INTERVAL_US) {
+        return;
+    }
+
+    const uint32_t submitted = emote_flush_stats.submitted.exchange(0, std::memory_order_relaxed);
+    const uint32_t completed = emote_flush_stats.completed.exchange(0, std::memory_order_relaxed);
+    const uint32_t errors = emote_flush_stats.errors.exchange(0, std::memory_order_relaxed);
+    const uint32_t total_dma_us = emote_flush_stats.total_dma_us.exchange(0, std::memory_order_relaxed);
+    const uint32_t max_dma_us = emote_flush_stats.max_dma_us.exchange(0, std::memory_order_relaxed);
+    const uint32_t max_submit_gap_us = emote_flush_stats.max_submit_gap_us.exchange(0, std::memory_order_relaxed);
+    const uint32_t avg_dma_us = completed ? (total_dma_us / completed) : 0;
+    const size_t internal_free = heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    const size_t internal_largest = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+
+    BROOKESIA_LOGI(
+        "Emote perf/5s: submit=%1%, done=%2%, err=%3%, DMA avg/max=%4%/%5% us, max submit gap=%6% us, "
+        "internal free/largest=%7%/%8%",
+        submitted, completed, errors, avg_dma_us, max_dma_us, max_submit_gap_us, internal_free, internal_largest
+    );
+    emote_flush_stats.report_started_us = now_us;
+}
 
 constexpr uint8_t to_area_mask(Display::GestureArea area)
 {
@@ -305,26 +392,66 @@ bool Display::start_expression_emote(int core_id)
     BROOKESIA_LOGI("Audio-first display enabled: emote priority=3, C5 render cap=12 FPS, overdue EAF frames are skipped");
 #endif
 
+    // Keep the LVGL adapter as the sole owner of the panel IO callback. The adapter forwards
+    // the actual DMA-complete interrupt here, so Emote can release its current draw buffer
+    // without synchronously blocking the single C5 core in dummy_draw_blit().
+    const esp_lv_adapter_dummy_draw_callbacks_t dummy_draw_callbacks{
+        .on_enable = nullptr,
+        .on_disable = nullptr,
+        .on_color_trans_done = on_emote_color_transfer_done,
+        .on_vsync = nullptr,
+    };
+    auto callbacks_ret = esp_lv_adapter_set_dummy_draw_callbacks(
+                             reinterpret_cast<lv_display_t *>(lvgl_display_), &dummy_draw_callbacks, nullptr
+                         );
+    BROOKESIA_CHECK_ESP_ERR_RETURN(callbacks_ret, false, "Failed to register asynchronous emote flush callback");
+
     // Subscribe to flush ready event
     auto flush_ready_event_slot = [&](const std::string & event_name, const boost::json::object & param_json) {
-        lib_utils::FunctionGuard notify_guard([]() {
-            // BROOKESIA_LOG_TRACE_GUARD();
-            expression::Emote::get_instance().native_notify_flush_finished();
-        });
-
         if (!esp_lv_adapter_get_dummy_draw_enabled(reinterpret_cast<lv_display_t *>(lvgl_display_))) {
+            notify_emote_flush_finished();
             return;
         }
 
         EmoteHelper::FlushReadyEventParam param;
         auto success = BROOKESIA_DESCRIBE_FROM_JSON(param_json, param);
-        BROOKESIA_CHECK_FALSE_EXIT(success, "Failed to parse flush ready event param: %1%");
+        if (!success) {
+            emote_flush_stats.errors.fetch_add(1, std::memory_order_relaxed);
+            BROOKESIA_LOGE("Failed to parse flush ready event param");
+            notify_emote_flush_finished();
+            return;
+        }
+
+        const uint32_t now_us = static_cast<uint32_t>(esp_timer_get_time());
+        report_emote_flush_stats_if_due(now_us);
+        const uint32_t previous_submit_us = emote_flush_stats.last_submit_us.exchange(now_us, std::memory_order_relaxed);
+        if (previous_submit_us != 0) {
+            update_atomic_max(emote_flush_stats.max_submit_gap_us, now_us - previous_submit_us);
+        }
+        const uint32_t submit_sequence = emote_flush_stats.submit_sequence.load(std::memory_order_relaxed);
+        const uint32_t complete_sequence = emote_flush_stats.complete_sequence.load(std::memory_order_acquire);
+        if ((submit_sequence - complete_sequence) >= EMOTE_DMA_TIMESTAMP_QUEUE_SIZE) {
+            emote_flush_stats.errors.fetch_add(1, std::memory_order_relaxed);
+            BROOKESIA_LOGE("Emote DMA timestamp queue overflow");
+            notify_emote_flush_finished();
+            return;
+        }
+        emote_flush_stats.submit_times_us[submit_sequence % EMOTE_DMA_TIMESTAMP_QUEUE_SIZE].store(
+            now_us, std::memory_order_relaxed
+        );
+        emote_flush_stats.submit_sequence.store(submit_sequence + 1, std::memory_order_release);
+        emote_flush_stats.submitted.fetch_add(1, std::memory_order_relaxed);
 
         auto ret = esp_lv_adapter_dummy_draw_blit(
                        reinterpret_cast<lv_display_t *>(lvgl_display_), param.x_start, param.y_start, param.x_end,
-                       param.y_end, param.data, true
+                       param.y_end, param.data, false
                    );
-        BROOKESIA_CHECK_ESP_ERR_EXIT(ret, "Failed to draw bitmap");
+        if (ret != ESP_OK) {
+            emote_flush_stats.submit_sequence.store(submit_sequence, std::memory_order_release);
+            emote_flush_stats.errors.fetch_add(1, std::memory_order_relaxed);
+            BROOKESIA_LOGE("Failed to submit asynchronous emote bitmap: %1%", esp_err_to_name(ret));
+            notify_emote_flush_finished();
+        }
     };
     static auto connection = EmoteHelper::subscribe_event(EmoteHelper::EventId::FlushReady, flush_ready_event_slot);
     BROOKESIA_CHECK_FALSE_RETURN(connection.connected(), false, "Failed to subscribe to flush ready event");

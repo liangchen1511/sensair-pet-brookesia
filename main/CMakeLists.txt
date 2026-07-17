@@ -1,4 +1,11 @@
 file(GLOB_RECURSE SRCS "${CMAKE_CURRENT_LIST_DIR}/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/*.c")
+set(BME690_SENSOR_API_DIR
+    "${CMAKE_SOURCE_DIR}/../examples/factory_demo/common_components/brookesia_app_temperature/BME690_SensorAPI"
+)
+list(APPEND SRCS
+    "${BME690_SENSOR_API_DIR}/bme69x.c"
+    "${BME690_SENSOR_API_DIR}/examples/common/common.c"
+)
 set(EMBEDDED_FILES "")
 
 if (CONFIG_EXAMPLE_AGENTS_COZE_PRIVATE_KEY_FILE_PATH)
@@ -11,7 +18,11 @@ endif()
 
 idf_component_register(
     SRCS ${SRCS}
-    INCLUDE_DIRS "."
+    INCLUDE_DIRS
+        "."
+        "${BME690_SENSOR_API_DIR}"
+        "${BME690_SENSOR_API_DIR}/examples/common"
+    REQUIRES driver esp_timer
     EMBED_TXTFILES ${EMBEDDED_FILES}
 )
 
@@ -88,6 +99,11 @@ esptool_py_flash_to_partition(flash ${ASSETS_PARTITION_NAME} "${ASSETS_FILE}")
 target_compile_definitions(${COMPONENT_LIB} PRIVATE
     ASSETS_PARTITION_NAME="${ASSETS_PARTITION_NAME}"
 )
+
+idf_component_get_property(LVGL_COMPONENT_LIB lvgl__lvgl COMPONENT_LIB)
+if(LVGL_COMPONENT_LIB)
+    target_compile_definitions(${LVGL_COMPONENT_LIB} PUBLIC LV_CONF_SKIP=1)
+endif()
 
 #
 # The following WiFi credentials are used for CI test. Please ignore them if you are not running CI test.
