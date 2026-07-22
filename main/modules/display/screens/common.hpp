@@ -10,6 +10,7 @@
 enum class DisplayScreen {
     Emote,
     Settings,
+    Sensors,
     Max,
 };
 
@@ -25,7 +26,7 @@ enum class DisplayAction {
     Max,
 };
 
-BROOKESIA_DESCRIBE_ENUM(DisplayScreen, Emote, Settings, Max)
+BROOKESIA_DESCRIBE_ENUM(DisplayScreen, Emote, Settings, Sensors, Max)
 BROOKESIA_DESCRIBE_ENUM(
     DisplayAction, ScrollLeft, ScrollRight, ScrollUp, ScrollDown, EdgeScrollLeft, EdgeScrollRight, EdgeScrollUp,
     EdgeScrollDown, Max

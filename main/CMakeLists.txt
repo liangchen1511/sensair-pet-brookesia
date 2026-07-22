@@ -4,7 +4,6 @@ set(BME690_SENSOR_API_DIR
 )
 list(APPEND SRCS
     "${BME690_SENSOR_API_DIR}/bme69x.c"
-    "${BME690_SENSOR_API_DIR}/examples/common/common.c"
 )
 set(EMBEDDED_FILES "")
 
@@ -21,7 +20,6 @@ idf_component_register(
     INCLUDE_DIRS
         "."
         "${BME690_SENSOR_API_DIR}"
-        "${BME690_SENSOR_API_DIR}/examples/common"
     REQUIRES driver esp_timer
     EMBED_TXTFILES ${EMBEDDED_FILES}
 )

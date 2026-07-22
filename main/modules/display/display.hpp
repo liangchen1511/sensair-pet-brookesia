@@ -23,6 +23,7 @@ class Display {
 public:
     friend class ScreenEmote;
     friend class ScreenSettings;
+    friend class ScreenSensors;
 
     static constexpr const char *TASK_GROUP_NAME = "Display";
 

@@ -1,9 +1,19 @@
 # ESP-IDF
 build/
+build-*/
 sdkconfig
 sdkconfig.old
+sdkconfig.*
+!sdkconfig.defaults
 managed_components/
 dependencies.lock
+compile_commands.json
+CMakeCache.txt
+CMakeFiles/
+.ninja_deps
+.ninja_log
+.ninja_lock
+idf_py_*.txt
 
 # Python
 __pycache__/
@@ -15,7 +25,9 @@ venv/
 # IDE / OS
 .vscode/
 .idea/
+*.code-workspace
 *.swp
+*.swo
 *~
 .DS_Store
 Thumbs.db
@@ -23,7 +35,9 @@ desktop.ini
 
 # 本地/临时
 MIGRATION_NOTES.md
-SERIAL_LOG.md
+SERIAL_LOG*.md
+serial*.txt
+monitor*.txt
 *.log
 *.tmp
 *.bak

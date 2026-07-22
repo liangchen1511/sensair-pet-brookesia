@@ -21,6 +21,7 @@
 #include "brookesia/hal_interface.hpp"
 #include "screens/settings.hpp"
 #include "screens/emote.hpp"
+#include "screens/sensors.hpp"
 #include "display.hpp"
 
 using namespace esp_brookesia;
@@ -171,7 +172,7 @@ bool Display::start(const Config &config)
 
         // BROOKESIA_LOGI("Gesture pressing: %1%", info);
 
-        if (info.direction != GestureDirection::None) {
+        if ((info.direction == GestureDirection::Left) || (info.direction == GestureDirection::Right)) {
             auto action = get_ui_action_from_gesture(info);
             if (action == DisplayAction::Max) {
                 return;
@@ -719,6 +720,7 @@ bool Display::start_ui_state_machine()
     // Create states
     std::shared_ptr<ScreenSettings> screen_settings;
     std::shared_ptr<ScreenEmote> screen_emote;
+    std::shared_ptr<ScreenSensors> screen_sensors;
     {
         // Lock LVGL adapter to ensure thread-safe operations
         esp_lv_adapter_lock(-1);
@@ -731,6 +733,9 @@ bool Display::start_ui_state_machine()
         BROOKESIA_CHECK_EXCEPTION_RETURN(
             screen_emote = std::make_shared<ScreenEmote>(), false, "Failed to create state"
         );
+        BROOKESIA_CHECK_EXCEPTION_RETURN(
+            screen_sensors = std::make_shared<ScreenSensors>(), false, "Failed to create state"
+        );
     }
 
     // Add states to state machine
@@ -738,61 +743,41 @@ bool Display::start_ui_state_machine()
     BROOKESIA_CHECK_FALSE_RETURN(add_settings_ret, false, "Failed to add state");
     auto add_emote_ret = ui_state_machine_->add_state(screen_emote);
     BROOKESIA_CHECK_FALSE_RETURN(add_emote_ret, false, "Failed to add state");
+    auto add_sensors_ret = ui_state_machine_->add_state(screen_sensors);
+    BROOKESIA_CHECK_FALSE_RETURN(add_sensors_ret, false, "Failed to add state");
 
     // Add transitions between states
     auto action_scroll_left = BROOKESIA_DESCRIBE_TO_STR(DisplayAction::ScrollLeft);
     auto action_scroll_right = BROOKESIA_DESCRIBE_TO_STR(DisplayAction::ScrollRight);
-    auto action_scroll_up = BROOKESIA_DESCRIBE_TO_STR(DisplayAction::ScrollUp);
-    auto action_scroll_down = BROOKESIA_DESCRIBE_TO_STR(DisplayAction::ScrollDown);
     auto action_edge_scroll_left = BROOKESIA_DESCRIBE_TO_STR(DisplayAction::EdgeScrollLeft);
     auto action_edge_scroll_right = BROOKESIA_DESCRIBE_TO_STR(DisplayAction::EdgeScrollRight);
-    auto action_edge_scroll_up = BROOKESIA_DESCRIBE_TO_STR(DisplayAction::EdgeScrollUp);
-    auto action_edge_scroll_down = BROOKESIA_DESCRIBE_TO_STR(DisplayAction::EdgeScrollDown);
-    // screen settings -> screen emote
+    // Finger swipe left returns from Settings to the Emote home screen.
+    BROOKESIA_CHECK_FALSE_RETURN(
+        ui_state_machine_->add_transition(
+            screen_settings->get_name(), action_scroll_left, screen_emote->get_name()
+        ), false, "Failed to add transition"
+    );
     BROOKESIA_CHECK_FALSE_RETURN(
         ui_state_machine_->add_transition(
             screen_settings->get_name(), action_edge_scroll_left, screen_emote->get_name()
         ), false, "Failed to add transition"
     );
+    // Finger swipe right returns from Sensors to the Emote home screen.
     BROOKESIA_CHECK_FALSE_RETURN(
         ui_state_machine_->add_transition(
-            screen_settings->get_name(), action_edge_scroll_right, screen_emote->get_name()
+            screen_sensors->get_name(), action_scroll_right, screen_emote->get_name()
         ), false, "Failed to add transition"
     );
     BROOKESIA_CHECK_FALSE_RETURN(
         ui_state_machine_->add_transition(
-            screen_settings->get_name(), action_edge_scroll_up, screen_emote->get_name()
+            screen_sensors->get_name(), action_edge_scroll_right, screen_emote->get_name()
         ), false, "Failed to add transition"
     );
-    BROOKESIA_CHECK_FALSE_RETURN(
-        ui_state_machine_->add_transition(
-            screen_settings->get_name(), action_edge_scroll_down, screen_emote->get_name()
-        ), false, "Failed to add transition"
-    );
-    // screen emote -> screen settings
-    BROOKESIA_CHECK_FALSE_RETURN(
-        ui_state_machine_->add_transition(
-            screen_emote->get_name(), action_scroll_left, screen_settings->get_name()
-        ), false, "Failed to add transition"
-    );
+    // The gestures are defined by finger movement, as agreed with the product interaction:
+    // swipe right -> Settings, swipe left -> Sensors.
     BROOKESIA_CHECK_FALSE_RETURN(
         ui_state_machine_->add_transition(
             screen_emote->get_name(), action_scroll_right, screen_settings->get_name()
-        ), false, "Failed to add transition"
-    );
-    BROOKESIA_CHECK_FALSE_RETURN(
-        ui_state_machine_->add_transition(
-            screen_emote->get_name(), action_scroll_up, screen_settings->get_name()
-        ), false, "Failed to add transition"
-    );
-    BROOKESIA_CHECK_FALSE_RETURN(
-        ui_state_machine_->add_transition(
-            screen_emote->get_name(), action_scroll_down, screen_settings->get_name()
-        ), false, "Failed to add transition"
-    );
-    BROOKESIA_CHECK_FALSE_RETURN(
-        ui_state_machine_->add_transition(
-            screen_emote->get_name(), action_edge_scroll_left, screen_settings->get_name()
         ), false, "Failed to add transition"
     );
     BROOKESIA_CHECK_FALSE_RETURN(
@@ -802,12 +787,12 @@ bool Display::start_ui_state_machine()
     );
     BROOKESIA_CHECK_FALSE_RETURN(
         ui_state_machine_->add_transition(
-            screen_emote->get_name(), action_edge_scroll_up, screen_settings->get_name()
+            screen_emote->get_name(), action_scroll_left, screen_sensors->get_name()
         ), false, "Failed to add transition"
     );
     BROOKESIA_CHECK_FALSE_RETURN(
         ui_state_machine_->add_transition(
-            screen_emote->get_name(), action_edge_scroll_down, screen_settings->get_name()
+            screen_emote->get_name(), action_edge_scroll_left, screen_sensors->get_name()
         ), false, "Failed to add transition"
     );
 

@@ -184,53 +184,9 @@ void AI_Agents::init_xiaozhi()
     BROOKESIA_LOGW("XiaoZhi agent is not enabled, skip initialization");
 #else
 
-    // Get device capabilities
-    auto get_device_capabilities_result = DeviceHelper::call_function_sync<boost::json::object>(
-            DeviceHelper::FunctionId::GetCapabilities
-                                          );
-    BROOKESIA_CHECK_FALSE_EXIT(
-        get_device_capabilities_result, "Failed to get device capabilities: %1%", get_device_capabilities_result.error()
-    );
-    BROOKESIA_LOGI("Device capabilities: %1%", get_device_capabilities_result.value());
-    DeviceHelper::Capabilities device_capabilities;
-    auto convert_result = BROOKESIA_DESCRIBE_FROM_JSON(get_device_capabilities_result.value(), device_capabilities);
-    BROOKESIA_CHECK_FALSE_EXIT(convert_result, "Failed to convert device capabilities");
-    // Build device service tools
-    std::vector<DeviceHelper::FunctionId> device_functions{
-        DeviceHelper::FunctionId::GetCapabilities,
-        DeviceHelper::FunctionId::GetBoardInfo,
-        DeviceHelper::FunctionId::ResetData
-    };
-    if (device_capabilities.find(std::string(hal::AudioCodecPlayerIface::NAME)) != device_capabilities.end()) {
-        device_functions.push_back(DeviceHelper::FunctionId::SetAudioPlayerVolume);
-        device_functions.push_back(DeviceHelper::FunctionId::GetAudioPlayerVolume);
-        device_functions.push_back(DeviceHelper::FunctionId::SetAudioPlayerMute);
-        device_functions.push_back(DeviceHelper::FunctionId::GetAudioPlayerMute);
-    }
-    if (device_capabilities.find(std::string(hal::DisplayBacklightIface::NAME)) != device_capabilities.end()) {
-        device_functions.push_back(DeviceHelper::FunctionId::SetDisplayBacklightBrightness);
-        device_functions.push_back(DeviceHelper::FunctionId::GetDisplayBacklightBrightness);
-        device_functions.push_back(DeviceHelper::FunctionId::SetDisplayBacklightOnOff);
-        device_functions.push_back(DeviceHelper::FunctionId::GetDisplayBacklightOnOff);
-    }
-    if (device_capabilities.find(std::string(hal::StorageFsIface::NAME)) != device_capabilities.end()) {
-        device_functions.push_back(DeviceHelper::FunctionId::GetStorageFileSystems);
-    }
-    if (device_capabilities.find(std::string(hal::PowerBatteryIface::NAME)) != device_capabilities.end()) {
-        device_functions.push_back(DeviceHelper::FunctionId::GetPowerBatteryInfo);
-        device_functions.push_back(DeviceHelper::FunctionId::GetPowerBatteryState);
-        device_functions.push_back(DeviceHelper::FunctionId::SetPowerBatteryChargingEnabled);
-    }
-    auto add_device_service_tools_result = XiaoZhiHelper::call_function_sync<boost::json::array>(
-            XiaoZhiHelper::FunctionId::AddMCP_ToolsWithServiceFunction,
-            std::string(DeviceHelper::get_name()),
-            BROOKESIA_DESCRIBE_TO_JSON(device_functions).as_array()
-                                           );
-    BROOKESIA_CHECK_FALSE_EXIT(
-        add_device_service_tools_result, "Failed to add device service tools: %1%",
-        add_device_service_tools_result.error()
-    );
-    BROOKESIA_LOGI("Added device service tools: %1%", add_device_service_tools_result.value());
+    // Volume and local display controls are available in Settings. Keep them
+    // out of XiaoZhi MCP to reduce tools/list size and preserve C5 internal RAM.
+    BROOKESIA_LOGI("Device control MCP tools disabled; use local Settings instead");
 
     auto add_environment_tools_result = XiaoZhiHelper::call_function_sync<boost::json::array>(
             XiaoZhiHelper::FunctionId::AddMCP_ToolsWithServiceFunction,
